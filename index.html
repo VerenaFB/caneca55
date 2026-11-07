@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calculadora de volumen – Caneca de 55 galones</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1b7fa8">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Caneca 55 gal">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+
+<style>
+  :root{--bg:#f4f7f9;--card:#fff;--ink:#16303d;--mut:#5f7480;--acc:#1b7fa8;--acc2:#0e5a7a;--line:#dbe5ea;--ok:#2e8b57;--warn:#d98a1c}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+  .wrap{max-width:980px;margin:0 auto;padding:20px 16px 40px}
+  h1{font-size:1.5rem;margin:0 0 4px}
+  .sub{color:var(--mut);margin:0 0 18px;font-size:.95rem}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:720px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+  label{display:block;font-weight:600;font-size:.9rem;margin-bottom:6px}
+  .row{display:flex;gap:8px;align-items:center}
+  input[type=number],select{font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);width:100%}
+  input[type=number]:focus,select:focus{outline:2px solid var(--acc);border-color:var(--acc)}
+  input[type=range]{width:100%;accent-color:var(--acc);margin:14px 0 4px}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:14px}
+  .seg button{font:inherit;border:0;background:#fff;padding:8px 16px;cursor:pointer;color:var(--mut)}
+  .seg button.on{background:var(--acc);color:#fff}
+  .big{font-size:2.6rem;font-weight:700;color:var(--acc2);line-height:1}
+  .big small{font-size:1.1rem;font-weight:600;color:var(--mut)}
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+  .stat{background:var(--bg);border-radius:10px;padding:10px 12px}
+  .stat b{display:block;font-size:1.15rem}
+  .stat span{font-size:.8rem;color:var(--mut)}
+  .bar{height:12px;background:var(--line);border-radius:6px;overflow:hidden;margin-top:14px}
+  .bar i{display:block;height:100%;background:var(--acc);width:0;transition:width .25s}
+  .note{font-size:.82rem;color:var(--mut);margin-top:10px;line-height:1.45}
+  .warn{color:var(--warn);font-weight:600}
+  svg{display:block;margin:0 auto;max-width:100%}
+  table{width:100%;border-collapse:collapse;font-size:.88rem;margin-top:6px}
+  th,td{padding:6px 8px;text-align:right;border-bottom:1px solid var(--line)}
+  th:first-child,td:first-child{text-align:left}
+  th{color:var(--mut);font-weight:600}
+  h2{font-size:1.05rem;margin:0 0 10px}
+  .full{grid-column:1/-1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="inst" class="card" style="display:none;margin-bottom:14px;align-items:center;gap:10px;justify-content:space-between">
+    <span>📲 Instala la app para usarla sin conexión.</span>
+    <button id="instBtn" style="font:inherit;background:var(--acc);color:#fff;border:0;border-radius:10px;padding:8px 14px;cursor:pointer">Instalar</button>
+  </div>
+  <div id="iosHint" class="note" style="display:none;margin-bottom:12px">En iPhone: toca <b>Compartir</b> y luego <b>Añadir a pantalla de inicio</b>.</div>
+  <h1>🛢️ Volumen en caneca de 55 galones</h1>
+  <p class="sub">Caneca metálica estándar (tambor de lámina, tapa cerrada). Ingresa la altura del líquido medida desde el fondo interior.</p>
+
+  <div class="grid">
+    <div class="card">
+      <div class="seg" id="unitSeg">
+        <button data-u="cm" class="on">Centímetros</button>
+        <button data-u="in">Pulgadas</button>
+      </div>
+
+      <label for="alt">Altura del líquido (<span class="uLbl">cm</span>)</label>
+      <input type="number" id="alt" min="0" step="0.1" value="40" inputmode="decimal">
+      <input type="range" id="rng" min="0" step="0.1" value="40">
+      <div class="note">Rango: 0 a <b id="maxTxt"></b> (altura interior total).</div>
+
+      <hr style="border:0;border-top:1px solid var(--line);margin:18px 0">
+
+      <label for="gal">Cálculo inverso: galones deseados → altura</label>
+      <div class="row">
+        <input type="number" id="gal" min="0" step="0.5" placeholder="Ej. 30" inputmode="decimal">
+        <div style="white-space:nowrap;font-weight:600" id="galRes">—</div>
+      </div>
+
+      <p class="note">
+        <b>Medidas estándar usadas:</b> diámetro interior 22,5 in (57,15 cm); altura interior 33,5 in (85,1 cm).
+        Capacidad nominal de 55 gal US se alcanza a 31,95 in (81,2 cm); hasta el borde (≈ 57,7 gal) quedan unos 2 in de espacio.
+        Galón US = 3,785 L. Se asume cilindro liso (se ignoran las nervaduras y el reborde); la precisión es de ±1–2 %.
+      </p>
+    </div>
+
+    <div class="card">
+      <svg id="drum" viewBox="0 0 220 300" width="220" height="300" aria-label="Esquema de la caneca"></svg>
+    </div>
+
+    <div class="card full">
+      <div class="big"><span id="rGal">0</span> <small>galones US</small></div>
+      <div class="bar"><i id="bar"></i></div>
+      <div class="stats">
+        <div class="stat"><b id="rL">0</b><span>litros</span></div>
+        <div class="stat"><b id="rPct">0 %</b><span>de la capacidad nominal (55 gal)</span></div>
+        <div class="stat"><b id="rFalta">55</b><span>galones para llegar a 55</span></div>
+        <div class="stat"><b id="rLib">0</b><span>espacio libre hasta el borde (gal)</span></div>
+      </div>
+      <p class="note" id="msg"></p>
+    </div>
+
+    <div class="card full">
+      <h2>Tabla de referencia</h2>
+      <table id="tbl"></table>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var D_IN = 22.5, H_IN = 33.5, NOM = 55, CM = 2.54, GAL_L = 3.785411784;
+  var AREA = Math.PI * Math.pow(D_IN/2, 2);          // in²
+  var H_NOM = NOM * 231 / AREA;                       // in a 55 gal
+  var unit = 'cm';
+  var $ = function(id){return document.getElementById(id)};
+  function toIn(v){return unit==='cm' ? v/CM : v}
+  function fromIn(v){return unit==='cm' ? v*CM : v}
+  function galOf(hIn){return AREA*hIn/231}
+  function fmt(n,d){return n.toLocaleString('es-CO',{minimumFractionDigits:d,maximumFractionDigits:d})}
+
+  // Dibujo
+  var X=40,W=140,TOP=40,BOT=270,RY=12, HP=BOT-TOP;
+  $('drum').innerHTML =
+    '<defs><clipPath id="cp"><path d="M'+X+' '+TOP+' L'+X+' '+BOT+' A70 '+RY+' 0 0 0 '+(X+W)+' '+BOT+' L'+(X+W)+' '+TOP+' Z"/></clipPath></defs>'+
+    '<path d="M'+X+' '+TOP+' L'+X+' '+BOT+' A70 '+RY+' 0 0 0 '+(X+W)+' '+BOT+' L'+(X+W)+' '+TOP+' Z" fill="#e9eff2" stroke="#2c4552" stroke-width="2"/>'+
+    '<g clip-path="url(#cp)"><rect id="fill" x="'+X+'" y="'+BOT+'" width="'+W+'" height="0" fill="#2b9fd1" opacity=".85"/>'+
+    '<ellipse id="surf" cx="'+(X+70)+'" cy="'+BOT+'" rx="70" ry="'+RY+'" fill="#6cc4e8"/></g>'+
+    '<ellipse cx="'+(X+70)+'" cy="'+TOP+'" rx="70" ry="'+RY+'" fill="#f7fafb" stroke="#2c4552" stroke-width="2"/>'+
+    '<line x1="'+X+'" x2="'+(X+W)+'" y1="'+(TOP+HP*0.30)+'" y2="'+(TOP+HP*0.30)+'" stroke="#2c4552" stroke-opacity=".25"/>'+
+    '<line x1="'+X+'" x2="'+(X+W)+'" y1="'+(TOP+HP*0.70)+'" y2="'+(TOP+HP*0.70)+'" stroke="#2c4552" stroke-opacity=".25"/>'+
+    '<line id="nomLine" x1="'+(X-8)+'" x2="'+(X+W+8)+'" stroke="#d98a1c" stroke-dasharray="4 3" stroke-width="1.5"/>'+
+    '<text id="nomTxt" x="'+(X+W+10)+'" font-size="11" fill="#d98a1c" font-weight="700">55 gal</text>'+
+    '<text id="lvlTxt" x="'+(X+70)+'" text-anchor="middle" font-size="16" font-weight="700" fill="#0e3a52"></text>';
+  var yNom = BOT - HP*(H_NOM/H_IN);
+  $('nomLine').setAttribute('y1',yNom);$('nomLine').setAttribute('y2',yNom);
+  $('nomTxt').setAttribute('y',yNom+4);
+
+  function setRange(){
+    var max = fromIn(H_IN);
+    $('rng').max = max.toFixed(1);
+    $('alt').max = max.toFixed(1);
+    $('maxTxt').textContent = fmt(max,1)+' '+unit;
+    document.querySelectorAll('.uLbl').forEach(function(e){e.textContent=unit});
+  }
+
+  function update(src){
+    var v = parseFloat($('alt').value);
+    if(isNaN(v)||v<0) v=0;
+    var hIn = toIn(v), over = hIn>H_IN;
+    if(over) hIn=H_IN;
+    var g = galOf(hIn), L = g*GAL_L, gTot = galOf(H_IN);
+    $('rGal').textContent = fmt(g,1);
+    $('rL').textContent = fmt(L,1);
+    $('rPct').textContent = fmt(g/NOM*100,1)+' %';
+    $('rFalta').textContent = g>=NOM ? '0' : fmt(NOM-g,1);
+    $('rLib').textContent = fmt(Math.max(gTot-g,0),1);
+    $('bar').style.width = Math.min(g/NOM*100,100)+'%';
+    $('bar').style.background = g>NOM ? 'var(--warn)' : 'var(--acc)';
+    $('msg').innerHTML = over ? '<span class="warn">La altura supera la altura interior ('+fmt(fromIn(H_IN),1)+' '+unit+'); se calculó con el máximo.</span>' :
+                         g>NOM ? '<span class="warn">Por encima de los 55 gal nominales (zona de rebose).</span>' : '';
+    if(src!=='rng') $('rng').value = fromIn(hIn);
+    var f = HP*(hIn/H_IN);
+    $('fill').setAttribute('y',BOT-f);$('fill').setAttribute('height',f+RY);
+    $('surf').setAttribute('cy',BOT-f);
+    $('lvlTxt').setAttribute('y',Math.min(BOT-f+34,BOT-8));
+    $('lvlTxt').textContent = fmt(g,1)+' gal';
+  }
+
+  function inverse(){
+    var g = parseFloat($('gal').value);
+    if(isNaN(g)||g<0){$('galRes').textContent='—';return}
+    var h = g*231/AREA;
+    $('galRes').textContent = h>H_IN ? 'Excede la caneca' : '= '+fmt(fromIn(h),1)+' '+unit;
+  }
+
+  function table(){
+    var rows='<tr><th>Galones</th><th>Litros</th><th>Altura ('+unit+')</th></tr>';
+    [5,10,15,20,25,30,35,40,45,50,55].forEach(function(g){
+      rows+='<tr><td>'+g+'</td><td>'+fmt(g*GAL_L,1)+'</td><td>'+fmt(fromIn(g*231/AREA),1)+'</td></tr>';
+    });
+    $('tbl').innerHTML=rows;
+  }
+
+  $('alt').addEventListener('input',function(){update('alt')});
+  $('rng').addEventListener('input',function(){$('alt').value=$('rng').value;update('rng')});
+  $('gal').addEventListener('input',inverse);
+  $('unitSeg').addEventListener('click',function(e){
+    var u=e.target.dataset.u; if(!u||u===unit) return;
+    var hIn=toIn(parseFloat($('alt').value)||0), gIn=parseFloat($('gal').value);
+    unit=u;
+    document.querySelectorAll('#unitSeg button').forEach(function(b){b.classList.toggle('on',b.dataset.u===u)});
+    setRange();
+    $('alt').value = fromIn(hIn).toFixed(1);
+    update(); inverse(); table();
+  });
+
+  setRange(); update(); inverse(); table();
+})();
+</script>
+<script>
+(function(){
+  if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+  }
+  var dp=null, box=document.getElementById('inst');
+  window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();dp=e;box.style.display='flex'});
+  document.getElementById('instBtn').addEventListener('click',function(){
+    if(!dp)return; dp.prompt(); dp.userChoice.finally(function(){dp=null;box.style.display='none'});
+  });
+  window.addEventListener('appinstalled',function(){box.style.display='none'});
+  var ios=/iphone|ipad|ipod/i.test(navigator.userAgent), standalone=window.navigator.standalone||matchMedia('(display-mode: standalone)').matches;
+  if(ios&&!standalone) document.getElementById('iosHint').style.display='block';
+})();
+</script>
+</body>
+</html>
